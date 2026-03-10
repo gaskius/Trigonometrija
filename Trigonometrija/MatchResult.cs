@@ -13,9 +13,7 @@ namespace Trigonometrija.App_Code
 
         public MatchResult(string r, string t, string d)
         {
-            this.RectName = r;
-            this.TriName = t;
-            this.Description = d;
+            this.RectName = r; this.TriName = t; this.Description = d;
         }
     }
 }

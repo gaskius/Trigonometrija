@@ -73,6 +73,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MatchList.cs" />
     <Compile Include="MatchResult.cs" />
     <Compile Include="InOutUtils.cs" />
     <Compile Include="Rectangle.cs" />

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using Trigonometrija.App_Code;
 
 namespace Trigonometrija.App_Code
@@ -11,19 +12,13 @@ namespace Trigonometrija.App_Code
         {
             if (!IsPostBack)
             {
-                // 1. Nuskaitome duomenis naudodami statinius įrankius
-                RectangleList  rs = InOutUtils.ReadRectangles(Server.MapPath("~/App_Data/Staciakampiai.txt"));
+                RectangleList rs = InOutUtils.ReadRectangles(Server.MapPath("~/App_Data/Staciakampiai.txt"));
                 TriangleList ts = InOutUtils.ReadTriangles(Server.MapPath("~/App_Data/Trikampiai.txt"));
 
-                // 2. Išsaugome nestatinius objektus sesijoje
                 Session["Rects"] = rs;
                 Session["Tris"] = ts;
 
-                // 3. Pirminis duomenų rodymas
-                GridView1.DataSource = ConvertRectsToList(rs);
-                GridView1.DataBind();
-                GridView2.DataSource = ConvertTrisToList(ts);
-                GridView2.DataBind();
+                RefreshMainGrids();
             }
         }
 
@@ -31,23 +26,31 @@ namespace Trigonometrija.App_Code
         {
             RectangleList rs = (RectangleList)Session["Rects"];
             TriangleList ts = (TriangleList)Session["Tris"];
-
             if (rs == null || ts == null) return;
 
+            // skaic
             MatchList resOne = new MatchList();
             MatchList resWhole = new MatchList();
-
-            // Atliekame geometrinius skaičiavimus
             PerformCalculations(rs, ts, resOne, resWhole);
 
-            // Užpildome rezultatų lenteles
+            // max radimas
+            Rectangle maxRect = FindMaxRectangle(rs);
+            Triangle maxTri = FindMaxTriangle(ts);
+
+            // rez
             GridView3.DataSource = ConvertMatchesToList(resOne);
             GridView3.DataBind();
+
             GridView4.DataSource = ConvertMatchesToList(resWhole);
             GridView4.DataBind();
 
-            // Randame ir parodome didžiausius plotus
-            ShowMaxAreas(rs, ts);
+            // max idejimas
+            List<object> maxItems = new List<object>();
+            if (maxRect != null) maxItems.Add(new { Pavadinimas = maxRect.Name, Plotas = maxRect.GetArea(), Tipas = "Stačiakampis" });
+            if (maxTri != null) maxItems.Add(new { Pavadinimas = maxTri.Name, Plotas = maxTri.GetArea(), Tipas = "Trikampis" });
+
+            GridView5.DataSource = maxItems;
+            GridView5.DataBind();
         }
 
         protected void Button2_Click(object sender, EventArgs e)
@@ -55,77 +58,87 @@ namespace Trigonometrija.App_Code
             TriangleList ts = (TriangleList)Session["Tris"];
             if (ts != null && !string.IsNullOrEmpty(TextBox1.Text))
             {
-                ts.RemoveByName(TextBox1.Text); // Tavo dinaminio sąrašo metodas
+                ts.RemoveByName(TextBox1.Text);
                 Session["Tris"] = ts;
-
-                // Atnaujiname pradinių duomenų lentelę
-                GridView2.DataSource = ConvertTrisToList(ts);
-                GridView2.DataBind();
-
-                // Automatiškai perskaičiuojame rezultatus po pašalinimo
+                RefreshMainGrids();
                 Button1_Click(null, null);
             }
         }
 
-        // --- SKAIČIAVIMŲ LOGIKA (Be UI elementų) ---
+        private void ProcessSingleRectangle(Rectangle r, TriangleList ts, MatchList m1, MatchList m2)
+        {
+            for (ts.Begin(); ts.Exist(); ts.Next())
+            {
+                Triangle t = ts.Get();
+                int pointsInside = 0;
+                if (r.ContainsPoint(t.X1, t.Y1)) pointsInside++;
+                if (r.ContainsPoint(t.X2, t.Y2)) pointsInside++;
+                if (r.ContainsPoint(t.X3, t.Y3)) pointsInside++;
 
+                if (pointsInside == 1)
+                    m1.Add(new MatchResult(r.Name, t.Name, "Viena viršūnė"));
+                else if (pointsInside == 3)
+                    m2.Add(new MatchResult(r.Name, t.Name, "Visas trikampis"));
+            }
+        }
         private void PerformCalculations(RectangleList rs, TriangleList ts, MatchList m1, MatchList m2)
         {
-            for (RectNode rn = rs.GetHead(); rn != null; rn = rn.Link)
+            for (rs.Begin(); rs.Exist(); rs.Next())
             {
-                for (TriNode tn = ts.GetHead(); tn != null; tn = tn.Link)
-                {
-                    int pointsInside = 0;
-                    if (rn.Data.ContainsPoint(tn.Data.X1, tn.Data.Y1)) pointsInside++;
-                    if (rn.Data.ContainsPoint(tn.Data.X2, tn.Data.Y2)) pointsInside++;
-                    if (rn.Data.ContainsPoint(tn.Data.X3, tn.Data.Y3)) pointsInside++;
-
-                    if (pointsInside == 1)
-                        m1.Add(new MatchResult(rn.Data.Name, tn.Data.Name, "Viena viršūnė"));
-                    else if (pointsInside == 3)
-                        m2.Add(new MatchResult(rn.Data.Name, tn.Data.Name, "Visas trikampis"));
-                }
+                ProcessSingleRectangle(rs.Get(), ts, m1, m2);
             }
         }
 
-        private void ShowMaxAreas(RectangleList rs, TriangleList ts)
+        private Rectangle FindMaxRectangle(RectangleList rs)
         {
             Rectangle maxR = null;
-            for (RectNode rn = rs.GetHead(); rn != null; rn = rn.Link)
-                if (maxR == null || rn.Data.GetArea() > maxR.GetArea()) maxR = rn.Data;
-
-            Triangle maxT = null;
-            for (TriNode tn = ts.GetHead(); tn != null; tn = tn.Link)
-                if (maxT == null || tn.Data.GetArea() > maxT.GetArea()) maxT = tn.Data;
-
-            List<object> maxItems = new List<object>();
-            if (maxR != null) maxItems.Add(new { Pavadinimas = maxR.Name, Plotas = maxR.GetArea(), Tipas = "Stačiakampis" });
-            if (maxT != null) maxItems.Add(new { Pavadinimas = maxT.Name, Plotas = maxT.GetArea(), Tipas = "Trikampis" });
-
-            GridView5.DataSource = maxItems;
-            GridView5.DataBind();
+            for (rs.Begin(); rs.Exist(); rs.Next())
+            {
+                Rectangle curr = rs.Get();
+                if (maxR == null || curr.GetArea() > maxR.GetArea())
+                    maxR = curr;
+            }
+            return maxR;
         }
 
-        // --- UI PAGALBINIAI METODAI (Konvertavimas GridView vaizdavimui) ---
+        private Triangle FindMaxTriangle(TriangleList ts)
+        {
+            Triangle maxT = null;
+            for (ts.Begin(); ts.Exist(); ts.Next())
+            {
+                Triangle curr = ts.Get();
+                if (maxT == null || curr.GetArea() > maxT.GetArea())
+                    maxT = curr;
+            }
+            return maxT;
+        }
+
+        private void RefreshMainGrids()
+        {
+            GridView1.DataSource = ConvertRectsToList((RectangleList)Session["Rects"]);
+            GridView1.DataBind();
+            GridView2.DataSource = ConvertTrisToList((TriangleList)Session["Tris"]);
+            GridView2.DataBind();
+        }
 
         private List<Rectangle> ConvertRectsToList(RectangleList rl)
         {
             List<Rectangle> temp = new List<Rectangle>();
-            for (RectNode curr = rl.GetHead(); curr != null; curr = curr.Link) temp.Add(curr.Data);
+            for (rl.Begin(); rl.Exist(); rl.Next()) temp.Add(rl.Get());
             return temp;
         }
 
         private List<Triangle> ConvertTrisToList(TriangleList tl)
         {
             List<Triangle> temp = new List<Triangle>();
-            for (TriNode curr = tl.GetHead(); curr != null; curr = curr.Link) temp.Add(curr.Data);
+            for (tl.Begin(); tl.Exist(); tl.Next()) temp.Add(tl.Get());
             return temp;
         }
 
         private List<MatchResult> ConvertMatchesToList(MatchList ml)
         {
             List<MatchResult> temp = new List<MatchResult>();
-            for (MatchNode curr = ml.GetHead(); curr != null; curr = curr.Link) temp.Add(curr.Data);
+            for (ml.Begin(); ml.Exist(); ml.Next()) temp.Add(ml.Get());
             return temp;
         }
     }

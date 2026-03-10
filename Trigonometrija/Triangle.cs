@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace Trigonometrija.App_Code
 {
-    public class Triangle
+    public class Triangle : IComparable
     {
         public string Name { get; set; }
         public double X1 { get; set; }
@@ -23,9 +20,13 @@ namespace Trigonometrija.App_Code
             this.X3 = x3; this.Y3 = y3;
         }
 
-        public double GetArea()
+        public double GetArea() => 0.5 * Math.Abs(X1 * (Y2 - Y3) + X2 * (Y3 - Y1) + X3 * (Y1 - Y2));
+
+        public int CompareTo(object obj)
         {
-            return 0.5 * Math.Abs(X1 * (Y2 - Y3) + X2 * (Y3 - Y1) + X3 * (Y1 - Y2));
+            if (obj == null) return 1;
+            Triangle other = obj as Triangle;
+            return string.Compare(this.Name, other.Name);
         }
     }
 }

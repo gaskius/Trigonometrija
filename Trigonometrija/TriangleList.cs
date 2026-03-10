@@ -1,48 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace Trigonometrija.App_Code
+﻿namespace Trigonometrija.App_Code
 {
-    public sealed class TriNode
-    {
-        public Triangle Data { get; set; }
-        public TriNode Link { get; set; }
-        public TriNode(Triangle data, TriNode link)
-        {
-            this.Data = data;
-            this.Link = link;
-        }
-    }
-
     public class TriangleList
     {
+        private sealed class TriNode
+        {
+            public Triangle Data { get; set; }
+            public TriNode Link { get; set; }
+            public TriNode(Triangle data, TriNode link) { this.Data = data; this.Link = link; }
+        }
+
         private TriNode head;
         private TriNode tail;
+        private TriNode d;
 
-        public TriangleList()
-        {
-            this.head = null;
-            this.tail = null;
-        }
+        public TriangleList() { head = null; tail = null; }
+
+        public void Begin() { d = head; }
+        public void Next() { if (d != null) d = d.Link; }
+        public bool Exist() => d != null;
+        public Triangle Get() => d.Data;
 
         public void Add(Triangle data)
         {
             TriNode newNode = new TriNode(data, null);
-            if (head != null)
-            {
-                tail.Link = newNode;
-                tail = newNode;
-            }
-            else
-            {
-                head = newNode;
-                tail = newNode;
-            }
+            if (head != null) { tail.Link = newNode; tail = newNode; }
+            else { head = newNode; tail = newNode; }
         }
-
-        public TriNode GetHead() { return head; }
 
         public void RemoveByName(string name)
         {
@@ -52,6 +35,8 @@ namespace Trigonometrija.App_Code
             {
                 if (curr.Data.Name == name)
                 {
+                    if (d == curr) d = curr.Link;
+
                     if (prev == null) head = curr.Link;
                     else prev.Link = curr.Link;
                     if (curr.Link == null) tail = prev;
@@ -59,24 +44,6 @@ namespace Trigonometrija.App_Code
                 }
                 prev = curr;
                 curr = curr.Link;
-            }
-        }
-
-        public void Sort()
-        {
-            for (TriNode d1 = head; d1 != null; d1 = d1.Link)
-            {
-                TriNode minNode = d1;
-                for (TriNode d2 = d1.Link; d2 != null; d2 = d2.Link)
-                {
-                    if (string.Compare(d2.Data.Name, minNode.Data.Name) < 0)
-                    {
-                        minNode = d2;
-                    }
-                }
-                Triangle temp = d1.Data;
-                d1.Data = minNode.Data;
-                minNode.Data = temp;
             }
         }
     }
