@@ -68,7 +68,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_Data\Staciakampiai.txt" />
+    <Content Include="App_Data\Staciakampiai1.txt" />
     <Content Include="App_Data\Trikampiai.txt" />
+    <Content Include="App_Data\Trikampiai1.txt" />
     <Content Include="LD_4.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -77,6 +79,7 @@
     <Compile Include="MatchResult.cs" />
     <Compile Include="InOutUtils.cs" />
     <Compile Include="Rectangle.cs" />
+    <Compile Include="TaskUtils.cs" />
     <Compile Include="Triangle.cs" />
     <Compile Include="RectangleList.cs" />
     <Compile Include="TriangleList.cs" />
@@ -90,6 +93,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

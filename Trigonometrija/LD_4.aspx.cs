@@ -6,53 +6,106 @@ using Trigonometrija.App_Code;
 
 namespace Trigonometrija.App_Code
 {
+    /// <summary>
+    /// Main WebForm page that handles data loading, calculations and UI updates
+    /// </summary>
     public partial class LD_4 : System.Web.UI.Page
     {
+        /// <summary>
+        /// Loads data from files on first page load
+        /// </summary>
+        /// <param name="sender">Event source</param>
+        /// <param name="e">Event arguments</param>
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                RectangleList rs = InOutUtils.ReadRectangles(Server.MapPath("~/App_Data/Staciakampiai.txt"));
-                TriangleList ts = InOutUtils.ReadTriangles(Server.MapPath("~/App_Data/Trikampiai.txt"));
+                RectangleList rs = InOutUtils.ReadRectangles
+                    (Server.MapPath("~/App_Data/Staciakampiai1.txt"));
+                TriangleList ts = InOutUtils.ReadTriangles
+                    (Server.MapPath("~/App_Data/Trikampiai1.txt"));
 
                 Session["Rects"] = rs;
                 Session["Tris"] = ts;
+
+                string resultPath = Server.MapPath("~/App_Data/PradDuomenys.txt");
+                InOutUtils.PrintInitialData(resultPath, rs, ts);
 
                 RefreshMainGrids();
             }
         }
 
+        /// <summary>
+        /// Handles calculation button click
+        /// </summary>
         protected void Button1_Click(object sender, EventArgs e)
         {
             RectangleList rs = (RectangleList)Session["Rects"];
             TriangleList ts = (TriangleList)Session["Tris"];
             if (rs == null || ts == null) return;
 
-            // skaic
+            rs.Sort();
+            ts.Sort();
+
             MatchList resOne = new MatchList();
             MatchList resWhole = new MatchList();
-            PerformCalculations(rs, ts, resOne, resWhole);
 
-            // max radimas
-            Rectangle maxRect = FindMaxRectangle(rs);
-            Triangle maxTri = FindMaxTriangle(ts);
+            TaskUtils.PerformCalculations(rs, ts, resOne, resWhole);
 
-            // rez
-            GridView3.DataSource = ConvertMatchesToList(resOne);
-            GridView3.DataBind();
+            resOne.Sort();
+            resWhole.Sort();
 
-            GridView4.DataSource = ConvertMatchesToList(resWhole);
-            GridView4.DataBind();
+            if (resOne.Count() == 0)
+            {
+                GridView3.Visible = false;
+                Label1.Text = 
+                    "Nėra stačiakampių kuriuose būtų viena trikampio viršūnė\n";
+            }
+            else
+            {
+                GridView3.Visible = true;
+                GridView3.DataSource = TaskUtils.ConvertMatchesToList(resOne);
+                GridView3.DataBind();
+            }
 
-            // max idejimas
+            if (resWhole.Count() == 0)
+            {
+                GridView4.Visible = false;
+                Label2.Text = "Nėra stačiakampių kuriuose būtų visas trikampis\n";
+            }
+            else
+            {
+                GridView4.Visible = true;
+                GridView4.DataSource = TaskUtils.ConvertMatchesToList(resWhole);
+                GridView4.DataBind();
+            }
+
+            Rectangle maxRect = TaskUtils.FindMaxRectangle(rs);
+            Triangle maxTri = TaskUtils.FindMaxTriangle(ts);
+
             List<object> maxItems = new List<object>();
-            if (maxRect != null) maxItems.Add(new { Pavadinimas = maxRect.Name, Plotas = maxRect.GetArea(), Tipas = "Stačiakampis" });
-            if (maxTri != null) maxItems.Add(new { Pavadinimas = maxTri.Name, Plotas = maxTri.GetArea(), Tipas = "Trikampis" });
+
+            if (maxRect != null)
+                maxItems.Add(new { 
+                    Name = maxRect.Name, 
+                    Area = maxRect.GetArea(), 
+                    Type = "Stačiakampis" });
+
+            if (maxTri != null)
+                maxItems.Add(new { 
+                    Name = maxTri.Name, 
+                    Area = maxTri.GetArea(), 
+                    Type = "Trikampis" });
 
             GridView5.DataSource = maxItems;
             GridView5.DataBind();
+
+            Label4.Text = CompareMaxAreas(maxRect, maxTri);
         }
 
+        /// <summary>
+        /// Removes Triangle by name when Button2 is clicked
+        /// </summary>
         protected void Button2_Click(object sender, EventArgs e)
         {
             TriangleList ts = (TriangleList)Session["Tris"];
@@ -65,81 +118,42 @@ namespace Trigonometrija.App_Code
             }
         }
 
-        private void ProcessSingleRectangle(Rectangle r, TriangleList ts, MatchList m1, MatchList m2)
-        {
-            for (ts.Begin(); ts.Exist(); ts.Next())
-            {
-                Triangle t = ts.Get();
-                int pointsInside = 0;
-                if (r.ContainsPoint(t.X1, t.Y1)) pointsInside++;
-                if (r.ContainsPoint(t.X2, t.Y2)) pointsInside++;
-                if (r.ContainsPoint(t.X3, t.Y3)) pointsInside++;
-
-                if (pointsInside == 1)
-                    m1.Add(new MatchResult(r.Name, t.Name, "Viena viršūnė"));
-                else if (pointsInside == 3)
-                    m2.Add(new MatchResult(r.Name, t.Name, "Visas trikampis"));
-            }
-        }
-        private void PerformCalculations(RectangleList rs, TriangleList ts, MatchList m1, MatchList m2)
-        {
-            for (rs.Begin(); rs.Exist(); rs.Next())
-            {
-                ProcessSingleRectangle(rs.Get(), ts, m1, m2);
-            }
-        }
-
-        private Rectangle FindMaxRectangle(RectangleList rs)
-        {
-            Rectangle maxR = null;
-            for (rs.Begin(); rs.Exist(); rs.Next())
-            {
-                Rectangle curr = rs.Get();
-                if (maxR == null || curr.GetArea() > maxR.GetArea())
-                    maxR = curr;
-            }
-            return maxR;
-        }
-
-        private Triangle FindMaxTriangle(TriangleList ts)
-        {
-            Triangle maxT = null;
-            for (ts.Begin(); ts.Exist(); ts.Next())
-            {
-                Triangle curr = ts.Get();
-                if (maxT == null || curr.GetArea() > maxT.GetArea())
-                    maxT = curr;
-            }
-            return maxT;
-        }
-
+        /// <summary>
+        /// Refreshes the data displayed in the main grid.
+        /// </summary>
         private void RefreshMainGrids()
         {
-            GridView1.DataSource = ConvertRectsToList((RectangleList)Session["Rects"]);
+            GridView1.DataSource = TaskUtils.ConvertRectsToList
+                ((RectangleList)Session["Rects"]);
             GridView1.DataBind();
-            GridView2.DataSource = ConvertTrisToList((TriangleList)Session["Tris"]);
+            GridView2.DataSource = TaskUtils.ConvertTrisToList
+                ((TriangleList)Session["Tris"]);
             GridView2.DataBind();
         }
 
-        private List<Rectangle> ConvertRectsToList(RectangleList rl)
+        /// <summary>
+        /// Compares the areas of the specified 
+        /// <see cref="Rectangle"/> and <see cref="Triangle"/>
+        /// </summary>
+        private string CompareMaxAreas(Rectangle maxRect, Triangle maxTri)
         {
-            List<Rectangle> temp = new List<Rectangle>();
-            for (rl.Begin(); rl.Exist(); rl.Next()) temp.Add(rl.Get());
-            return temp;
-        }
+            if (maxRect == null || maxTri == null)
+            {
+                return "Nepakanka duomenų palyginimui";
+            }
 
-        private List<Triangle> ConvertTrisToList(TriangleList tl)
-        {
-            List<Triangle> temp = new List<Triangle>();
-            for (tl.Begin(); tl.Exist(); tl.Next()) temp.Add(tl.Get());
-            return temp;
-        }
-
-        private List<MatchResult> ConvertMatchesToList(MatchList ml)
-        {
-            List<MatchResult> temp = new List<MatchResult>();
-            for (ml.Begin(); ml.Exist(); ml.Next()) temp.Add(ml.Get());
-            return temp;
+            if (maxRect.GetArea() > maxTri.GetArea())
+            {
+                return "Stačiakampis didesnis";
+            }
+            else if (maxRect.GetArea() < maxTri.GetArea())
+            {
+                return "Trikampis didesnis";
+            }
+            else
+            {
+                return "Plotai lygūs";
+            }
         }
     }
 }
