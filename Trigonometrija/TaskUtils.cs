@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Trigonometrija.App_Code
 {
@@ -69,39 +68,6 @@ namespace Trigonometrija.App_Code
                     maxT = curr;
             }
             return maxT;
-        }
-
-        /// <summary>
-        /// Converts rectangle list to standard list
-        /// </summary>
-        public static List<Rectangle> ConvertRectsToList(RectangleList rl)
-        {
-            List<Rectangle> temp = new List<Rectangle>();
-            if (rl == null) return temp;
-            for (rl.Begin(); rl.Exist(); rl.Next()) temp.Add(rl.Get());
-            return temp;
-        }
-
-        /// <summary>
-        /// Converts triangle list to standard list
-        /// </summary>
-        public static List<Triangle> ConvertTrisToList(TriangleList tl)
-        {
-            List<Triangle> temp = new List<Triangle>();
-            if (tl == null) return temp;
-            for (tl.Begin(); tl.Exist(); tl.Next()) temp.Add(tl.Get());
-            return temp;
-        }
-
-        /// <summary>
-        /// Converts Matches list to standard list
-        /// </summary>
-        public static List<MatchResult> ConvertMatchesToList(MatchList ml)
-        {
-            List<MatchResult> temp = new List<MatchResult>();
-            if (ml == null) return temp;
-            for (ml.Begin(); ml.Exist(); ml.Next()) temp.Add(ml.Get());
-            return temp;
         }
     }
 }

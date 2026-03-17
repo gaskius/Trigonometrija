@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using Trigonometrija.App_Code;
@@ -30,10 +31,10 @@ namespace Trigonometrija.App_Code
                     if (parts.Length >= 5)
                     {
                         string name = parts[0];
-                        double x1 = double.Parse(parts[1]);
-                        double y1 = double.Parse(parts[2]);
-                        double x2 = double.Parse(parts[3]);
-                        double y2 = double.Parse(parts[4]);
+                        double x1 = double.Parse(parts[1], CultureInfo.InvariantCulture);
+                        double y1 = double.Parse(parts[2], CultureInfo.InvariantCulture);
+                        double x2 = double.Parse(parts[3], CultureInfo.InvariantCulture);
+                        double y2 = double.Parse(parts[4], CultureInfo.InvariantCulture);
 
                         Rectangle rect = new Rectangle(name, x1, y1, x2, y2);
                         list.Add(rect);
@@ -66,12 +67,12 @@ namespace Trigonometrija.App_Code
                     if (parts.Length >= 7)
                     {
                         string name = parts[0];
-                        double x1 = double.Parse(parts[1]);
-                        double y1 = double.Parse(parts[2]);
-                        double x2 = double.Parse(parts[3]);
-                        double y2 = double.Parse(parts[4]);
-                        double x3 = double.Parse(parts[5]);
-                        double y3 = double.Parse(parts[6]);
+                        double x1 = double.Parse(parts[1], CultureInfo.InvariantCulture);
+                        double y1 = double.Parse(parts[2], CultureInfo.InvariantCulture);
+                        double x2 = double.Parse(parts[3], CultureInfo.InvariantCulture);
+                        double y2 = double.Parse(parts[4], CultureInfo.InvariantCulture);
+                        double x3 = double.Parse(parts[5], CultureInfo.InvariantCulture);
+                        double y3 = double.Parse(parts[6], CultureInfo.InvariantCulture);
 
                         Triangle tri = new Triangle(name, x1, y1, x2, y2, x3, y3);
                         list.Add(tri);
@@ -138,6 +139,75 @@ namespace Trigonometrija.App_Code
                     t.Name, t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3);
             }
             sw.WriteLine(new string('-', 50));
+        }
+        /// <summary>
+        /// Pagrindinis rezultatų spausdinimo metodas
+        /// </summary>
+        public static void PrintCalculationResults(string fileName, MatchList m1, MatchList m2, Rectangle maxR, Triangle maxT)
+        {
+            using (StreamWriter sw = new StreamWriter(fileName, false, Encoding.UTF8))
+            {
+                sw.WriteLine("REZULTATAI");
+                sw.WriteLine();
+
+                PrintMatchTable(sw, m1, "a) Stačiakampiai, kuriuose yra viena trikampio viršūnė:");
+                sw.WriteLine();
+
+                PrintMatchTable(sw, m2, "b) Stačiakampiai, kuriuose yra visas trikampis:");
+                sw.WriteLine();
+
+                sw.WriteLine("DIDŽIAUSI PLOTAI");
+                sw.WriteLine(new string('-', 51));
+                if (maxR != null)
+                    sw.WriteLine("Max stačiakampis: {0,-10} | Plotas: {1,10:F2} |", maxR.Name, maxR.GetArea());
+                else
+                    sw.WriteLine("Max stačiakampis: Nerastas");
+
+                if (maxT != null)
+                    sw.WriteLine("Max trikampis:    {0,-10} | Plotas: {1,10:F2} |", maxT.Name, maxT.GetArea());
+                else
+                    sw.WriteLine("Max trikampis:    Nerastas");
+                sw.WriteLine(new string('-', 51));
+                sw.WriteLine();
+                if (maxT.GetArea() > maxR.GetArea())
+                {
+                    sw.WriteLine("Trikampio plotas didesnis.");
+                }
+                if (maxT.GetArea() == maxR.GetArea())
+                {
+                    sw.WriteLine("Trikampio ir stačiakampio plotai lygūs.");
+                }
+                else
+                {
+                    sw.WriteLine("Stačiakampio plotas didesnis.");
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// Pagalbinis metodas MatchList sąrašui spausdinti
+        /// </summary>
+        private static void PrintMatchTable(StreamWriter sw, MatchList list, string title)
+        {
+            sw.WriteLine(title);
+
+            if (list.Count() == 0)
+            {
+                sw.WriteLine("Tokių stačiakampių nėra.");
+                return;
+            }
+
+            sw.WriteLine(new string('-', 37));
+            sw.WriteLine("| {0,-15} | {1,-15} |", "Stačiakampis", "Trikampis");
+            sw.WriteLine(new string('-', 37));
+
+            for (list.Begin(); list.Exist(); list.Next())
+            {
+                MatchResult m = list.Get();
+                sw.WriteLine("| {0,-15} | {1,-15} |", m.RectName, m.TriName);
+            }
+            sw.WriteLine(new string('-', 37));
         }
     }
 }

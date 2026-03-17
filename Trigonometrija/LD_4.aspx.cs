@@ -21,9 +21,9 @@ namespace Trigonometrija.App_Code
             if (!IsPostBack)
             {
                 RectangleList rs = InOutUtils.ReadRectangles
-                    (Server.MapPath("~/App_Data/Staciakampiai1.txt"));
+                    (Server.MapPath("~/App_Data/Staciakampiai.txt"));
                 TriangleList ts = InOutUtils.ReadTriangles
-                    (Server.MapPath("~/App_Data/Trikampiai1.txt"));
+                    (Server.MapPath("~/App_Data/Trikampiai.txt"));
 
                 Session["Rects"] = rs;
                 Session["Tris"] = ts;
@@ -58,44 +58,41 @@ namespace Trigonometrija.App_Code
             if (resOne.Count() == 0)
             {
                 GridView3.Visible = false;
-                Label1.Text = 
-                    "Nėra stačiakampių kuriuose būtų viena trikampio viršūnė\n";
+                Label1.Text = "a) Nėra stačiakampių su viena viršūne";
             }
             else
             {
                 GridView3.Visible = true;
-                GridView3.DataSource = TaskUtils.ConvertMatchesToList(resOne);
+                GridView3.DataSource = resOne;
                 GridView3.DataBind();
             }
 
             if (resWhole.Count() == 0)
             {
                 GridView4.Visible = false;
-                Label2.Text = "Nėra stačiakampių kuriuose būtų visas trikampis\n";
+                Label2.Text = "b) Nėra stačiakampių su visu trikampiu";
             }
             else
             {
                 GridView4.Visible = true;
-                GridView4.DataSource = TaskUtils.ConvertMatchesToList(resWhole);
+                GridView4.DataSource = resWhole;
                 GridView4.DataBind();
             }
 
             Rectangle maxRect = TaskUtils.FindMaxRectangle(rs);
             Triangle maxTri = TaskUtils.FindMaxTriangle(ts);
 
-            List<object> maxItems = new List<object>();
+            string resultsPath = Server.MapPath("~/App_Data/Rezultatai.txt");
+            InOutUtils.PrintCalculationResults(resultsPath, resOne, resWhole, maxRect, maxTri);
 
-            if (maxRect != null)
-                maxItems.Add(new { 
-                    Name = maxRect.Name, 
-                    Area = maxRect.GetArea(), 
-                    Type = "Stačiakampis" });
+            int count = 0;
+            if (maxRect != null) count++;
+            if (maxTri != null) count++;
 
-            if (maxTri != null)
-                maxItems.Add(new { 
-                    Name = maxTri.Name, 
-                    Area = maxTri.GetArea(), 
-                    Type = "Trikampis" });
+            object[] maxItems = new object[count];
+            int i = 0;
+            if (maxRect != null) maxItems[i++] = new { Name = maxRect.Name, Area = maxRect.GetArea(), Type = "Stačiakampis" };
+            if (maxTri != null) maxItems[i++] = new { Name = maxTri.Name, Area = maxTri.GetArea(), Type = "Trikampis" };
 
             GridView5.DataSource = maxItems;
             GridView5.DataBind();
@@ -123,12 +120,19 @@ namespace Trigonometrija.App_Code
         /// </summary>
         private void RefreshMainGrids()
         {
-            GridView1.DataSource = TaskUtils.ConvertRectsToList
-                ((RectangleList)Session["Rects"]);
-            GridView1.DataBind();
-            GridView2.DataSource = TaskUtils.ConvertTrisToList
-                ((TriangleList)Session["Tris"]);
-            GridView2.DataBind();
+            RectangleList rs = (RectangleList)Session["Rects"];
+            TriangleList ts = (TriangleList)Session["Tris"];
+
+            if (rs != null)
+            {
+                GridView1.DataSource = rs;
+                GridView1.DataBind();
+            }
+            if (ts != null)
+            {
+                GridView2.DataSource = ts;
+                GridView2.DataBind();
+            }
         }
 
         /// <summary>

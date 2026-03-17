@@ -1,9 +1,11 @@
-﻿namespace Trigonometrija.App_Code
+﻿using System.Collections;
+
+namespace Trigonometrija.App_Code
 {
     /// <summary>
     /// Linked list for MatchResult objects
     /// </summary>
-    public class MatchList
+    public class MatchList : IEnumerable
     {
         private sealed class MatchNode
         {
@@ -68,7 +70,15 @@
             }
             return count;
         }
-
+        public IEnumerator GetEnumerator()
+        {
+            MatchNode current = head;
+            while (current != null)
+            {
+                yield return current.Data;
+                current = current.Link;
+            }
+        }
         /// <summary>
         /// Sorts match results
         /// </summary>

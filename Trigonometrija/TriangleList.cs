@@ -1,10 +1,13 @@
-﻿namespace Trigonometrija.App_Code
+﻿using System.Collections;
+using System.Linq;
+
+namespace Trigonometrija.App_Code
 {
     /// <summary>
     /// The <see cref="TriangleList"/> class represents a 
     /// collection of <see cref="Triangle"/> objects.
     /// </summary>
-    public class TriangleList
+    public class TriangleList:IEnumerable
     {
         private sealed class TriNode
         {
@@ -87,6 +90,15 @@
                 }
                 prev = curr;
                 curr = curr.Link;
+            }
+        }
+        public IEnumerator GetEnumerator()
+        {
+            TriNode current = head;
+            while (current != null)
+            {
+                yield return current.Data;
+                current = current.Link;
             }
         }
         /// <summary>

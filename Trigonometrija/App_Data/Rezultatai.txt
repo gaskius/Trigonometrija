@@ -1,0 +1,25 @@
+﻿REZULTATAI
+
+a) Stačiakampiai, kuriuose yra viena trikampio viršūnė:
+-------------------------------------
+| Stačiakampis    | Trikampis       |
+-------------------------------------
+| S1              | T_Viena_S1      |
+| S2              | T_Viena_S2      |
+-------------------------------------
+
+b) Stačiakampiai, kuriuose yra visas trikampis:
+-------------------------------------
+| Stačiakampis    | Trikampis       |
+-------------------------------------
+| S1              | T_Visas_S1      |
+| S2              | T_Visas_S2      |
+-------------------------------------
+
+DIDŽIAUSI PLOTAI
+---------------------------------------------------
+Max stačiakampis: S1         | Plotas:     100,00 |
+Max trikampis:    T_Viena_S1 | Plotas:      30,00 |
+---------------------------------------------------
+
+Stačiakampio plotas didesnis.

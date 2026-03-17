@@ -8,7 +8,7 @@ namespace Trigonometrija.App_Code
     /// <summary>
     /// Represents a match between rectangle and triangle
     /// </summary>
-    public class MatchResult
+    public class MatchResult : IComparable<MatchResult>
     {
         public string RectName { get; set; }
         public string TriName { get; set; }

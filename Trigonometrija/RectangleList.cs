@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 
 namespace Trigonometrija.App_Code
 {
@@ -6,7 +7,7 @@ namespace Trigonometrija.App_Code
     /// Represents a collection of <see cref="Rectangle"/> objects 
     /// with sequential access and basic list operations.
     /// </summary>
-    public class RectangleList
+    public class RectangleList: IEnumerable
     {
         private sealed class RectNode
         {
@@ -72,6 +73,15 @@ namespace Trigonometrija.App_Code
             { 
                 head = n; 
                 tail = n; 
+            }
+        }
+        public IEnumerator GetEnumerator()
+        {
+            RectNode current = head;
+            while (current != null)
+            {
+                yield return current.Data;
+                current = current.Link;
             }
         }
         /// <summary>
