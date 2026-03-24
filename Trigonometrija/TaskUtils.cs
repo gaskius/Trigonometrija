@@ -11,7 +11,8 @@ namespace Trigonometrija.App_Code
         /// <param name="ts">List of triangles</param>
         /// <param name="m1">Matches with one point inside</param>
         /// <param name="m2">Matches with full triangle inside</param>
-        public static void ProcessSingleRectangle(Rectangle r, TriangleList ts, MatchList m1, MatchList m2)
+        public static void ProcessSingleRectangle
+            (Rectangle r, TriangleList ts, MatchList m1, MatchList m2)
         {
             for (ts.Begin(); ts.Exist(); ts.Next())
             {
@@ -28,7 +29,8 @@ namespace Trigonometrija.App_Code
             }
         }
 
-        public static void PerformCalculations(RectangleList rs, TriangleList ts, MatchList m1, MatchList m2)
+        public static void PerformCalculations
+            (RectangleList rs, TriangleList ts, MatchList m1, MatchList m2)
         {
             for (rs.Begin(); rs.Exist(); rs.Next())
             {
@@ -40,7 +42,8 @@ namespace Trigonometrija.App_Code
         /// Finds the rectangle with the largest area in the specified list.
         /// </summary>
         /// <param name="rs">The list of rectangles to search</param>
-        /// <returns>The <see cref="Rectangle"/> with the largest area in the list, or null if the list is empty.</returns>
+        /// <returns>The <see cref="Rectangle"/> with the largest area in the 
+        /// list, or null if the list is empty.</returns>
         public static Rectangle FindMaxRectangle(RectangleList rs)
         {
             Rectangle maxR = null;
@@ -56,8 +59,10 @@ namespace Trigonometrija.App_Code
         /// <summary>
         /// Finds the triangle with the largest area in the specified list.
         /// </summary>
-        /// <param name="ts">The list of triangles to search. Must not be null.</param>
-        /// <returns>The <see cref="Triangle"/> with the largest area in the list, or null if the list is empty.</returns>
+        /// <param name="ts">The list of triangles to search. 
+        /// Must not be null.</param>
+        /// <returns>The <see cref="Triangle"/> with the largest area 
+        /// in the list, or null if the list is empty.</returns>
         public static Triangle FindMaxTriangle(TriangleList ts)
         {
             Triangle maxT = null;

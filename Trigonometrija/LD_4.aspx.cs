@@ -21,9 +21,9 @@ namespace Trigonometrija.App_Code
             if (!IsPostBack)
             {
                 RectangleList rs = InOutUtils.ReadRectangles
-                    (Server.MapPath("~/App_Data/Staciakampiai.txt"));
+                    (Server.MapPath("~/App_Data/Staciakampiai1.txt"));
                 TriangleList ts = InOutUtils.ReadTriangles
-                    (Server.MapPath("~/App_Data/Trikampiai.txt"));
+                    (Server.MapPath("~/App_Data/Trikampiai1.txt"));
 
                 Session["Rects"] = rs;
                 Session["Tris"] = ts;
@@ -83,7 +83,8 @@ namespace Trigonometrija.App_Code
             Triangle maxTri = TaskUtils.FindMaxTriangle(ts);
 
             string resultsPath = Server.MapPath("~/App_Data/Rezultatai.txt");
-            InOutUtils.PrintCalculationResults(resultsPath, resOne, resWhole, maxRect, maxTri);
+            InOutUtils.PrintCalculationResults(resultsPath, resOne, resWhole, 
+                maxRect, maxTri);
 
             int count = 0;
             if (maxRect != null) count++;
@@ -91,8 +92,10 @@ namespace Trigonometrija.App_Code
 
             object[] maxItems = new object[count];
             int i = 0;
-            if (maxRect != null) maxItems[i++] = new { Name = maxRect.Name, Area = maxRect.GetArea(), Type = "Stačiakampis" };
-            if (maxTri != null) maxItems[i++] = new { Name = maxTri.Name, Area = maxTri.GetArea(), Type = "Trikampis" };
+            if (maxRect != null) maxItems[i++] = new { Name = maxRect.Name, 
+                Area = maxRect.GetArea(), Type = "Stačiakampis" };
+            if (maxTri != null) maxItems[i++] = new { Name = maxTri.Name, 
+                Area = maxTri.GetArea(), Type = "Trikampis" };
 
             GridView5.DataSource = maxItems;
             GridView5.DataBind();
